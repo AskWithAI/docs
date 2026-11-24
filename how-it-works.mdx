@@ -1,0 +1,74 @@
+---
+title: "How decisions work"
+description: "See how AskWithAI's control plane uses mistake costs, honest confidence, and an escalation ladder to make fast, accurate decisions."
+---
+
+Every Decision Runtime follows the same simple loop: check fast rules first, ask a fast calibrated model, escalate only when a mistake would cost more than a second opinion, return a clear receipt, and learn from real outcomes.
+
+## A decision, start to finish
+
+Imagine a refund agent using AskWithAI's **Payment Refund** template. A customer asks for a **$240 refund** on a monitor bought 34 days ago, reporting a power-supply failure under its 1-year warranty.
+
+*(The numbers below come from a recorded run of the Payment Refund template on its practice cases.)*
+
+<Steps>
+  <Step title="Fast model answers in 71 ms">
+    The fast decision model evaluates the request and answers **`approve`**, with **89% confidence**.
+  </Step>
+  <Step title="Plain code checks the mistake-cost math">
+    A wrong approval would lose the full **$240**. An 11% chance of losing $240 is about **$26 of expected loss** — far more than the ~1.5 cents a reasoning model costs for a second opinion.
+  </Step>
+  <Step title="Runtime escalates to a reasoning model">
+    The control plane automatically escalates the case. A reasoning model reads the 1-year warranty rule and also confirms **`approve`**.
+  </Step>
+  <Step title="Your app gets the answer and a receipt">
+    AskWithAI returns the typed answer alongside a plain-language **receipt** showing which tier answered, why it escalated, latency, and cost.
+  </Step>
+  <Step title="Real outcome improves the next version">
+    Later, when the warranty claim is confirmed valid, your app reports the outcome. It becomes a **verified test case**, and future runtime versions are replayed against it before release.
+  </Step>
+</Steps>
+
+Now compare a **$320 refund** where the customer returned an empty box: the fast model is **97% sure** it should **`deny`**, and a wrong denial costs only **$15** in customer goodwill. The expected loss (~$0.45) is tiny, and a second opinion is not worth paying for — so the fast answer stands immediately.
+
+## The escalation ladder
+
+AskWithAI routes each request up a predictable ladder of **tiers**, stopping as soon as the current tier is trustworthy enough for the stakes:
+
+<AccordionGroup>
+  <Accordion title="1. Plain rules (free & instant)" icon="list-check">
+    Deterministic conditions checked before any model runs — for example, *"If the order amount is under $5, approve automatically."* Rules cost nothing and execute in under a millisecond.
+  </Accordion>
+  <Accordion title="2. Fast model (milliseconds)" icon="bolt">
+    A small, calibrated decision model (such as Jev or Gemini Decisions) that handles the majority of routine cases at minimal latency and cost, returning both an answer and a calibrated confidence score.
+  </Accordion>
+  <Accordion title="3. Reasoning model or council (second opinion)" icon="brain">
+    When expected mistake loss exceeds the cost of asking, the control plane escalates to a stronger reasoning model — or a council of diverse models — to weigh nuanced policies and edge cases.
+  </Accordion>
+  <Accordion title="4. Expert Review (human in the loop)" icon="user-check">
+    When models remain unsure on a high-stakes case, or when a crucial fact is missing, the decision routes to **Expert Review**. A person settles it, the answer goes back to your agent, and the ruling becomes a verified test case.
+  </Accordion>
+</AccordionGroup>
+
+## Key safeguards explained
+
+These concepts explain why AskWithAI behaves predictably in production instead of acting like a black box.
+
+<CardGroup cols={2}>
+  <Card title="Expected loss" icon="calculator">
+    `Expected loss = (chance of being wrong) × (mistake cost)`. Plain code compares this number against the price of a second opinion on every request.
+  </Card>
+  <Card title="Asymmetric mistake costs" icon="scale-unbalanced">
+    Not all errors hurt equally. Approving a fraudulent $950 refund costs $950, while wrongly denying a valid one might cost $15. Setting both costs lets the control plane demand much higher certainty before approving.
+  </Card>
+  <Card title="Calibration checks" icon="shield-check">
+    A fast model that is 85% accurate and honest about its doubt is more valuable than one that is 90% accurate but overconfident when wrong. AskWithAI tests calibration and refuses to let an overconfident model answer alone.
+  </Card>
+  <Card title="Verified labels only" icon="badge-check">
+    Only a person's ruling or a real-world outcome can become a test label. Two models disagreeing is a signal to investigate — never treated as ground truth.
+  </Card>
+</CardGroup>
+
+<Note>
+  **Privacy by default:** AskWithAI does not retain raw request inputs unless you explicitly opt in. By default, only a one-way fingerprint of each input is kept.
+</Note>

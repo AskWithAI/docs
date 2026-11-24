@@ -1,0 +1,83 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "AskWithAI",
+  "colors": {
+    "primary": "#D99B00",
+    "light": "#FFCC00",
+    "dark": "#B88200"
+  },
+  "favicon": "/favicon.svg",
+  "navigation": {
+    "pages": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Core Concepts",
+        "pages": [
+          "how-it-works",
+          "sdk-and-api"
+        ]
+      },
+      {
+        "group": "AI Agents",
+        "pages": [
+          "connect-your-agent"
+        ]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "AskWithAI Platform",
+          "href": "https://askwith.ai",
+          "icon": "globe"
+        },
+        {
+          "anchor": "TypeScript SDK",
+          "href": "https://github.com/AskWithAI/askwithai-sdk",
+          "icon": "github"
+        }
+      ]
+    }
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "navbar": {
+    "links": [
+      {
+        "label": "GitHub",
+        "href": "https://github.com/AskWithAI"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Open Platform",
+      "href": "https://askwith.ai"
+    }
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/AskWithAI"
+    }
+  }
+}

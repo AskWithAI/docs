@@ -1,0 +1,64 @@
+---
+title: "Overview"
+description: "AskWithAI is the Decision Runtime Platform — helping AI agents and apps make decisions that are accurate, fast, and always improving."
+---
+
+AskWithAI is the **Decision Runtime Platform**. It helps your agents and applications make repeated decisions — like approving a refund, triaging a support ticket, or checking a command before running it — at the speed and low cost of a small model, with the accuracy of a reasoning model whenever the stakes are high.
+
+<Info>
+  **The core idea in one sentence:** A fast, calibrated model answers routine cases in milliseconds; plain code escalates to a stronger model or a human expert only when the expected cost of a mistake is higher than the cost of a second opinion.
+</Info>
+
+## Why route instead of picking one model?
+
+When an agent has to make the same kind of decision thousands of times a day, picking a single model forces an awkward trade-off:
+
+| Approach | Routine cases | Hard or high-stakes cases |
+| --- | --- | --- |
+| **Fast model alone** | Fast and cheap | Misses nuanced edge cases, leading to costly mistakes |
+| **Reasoning model alone** | Accurate, but slow and expensive on every call | Accurate, at full reasoning latency and cost |
+| **AskWithAI Decision Runtime** | Fast model handles them alone (low cost, low latency) | Uncertain or high-stakes cases automatically get a second opinion |
+
+Every decision is recorded with a **receipt** and later linked to its **real outcome**. That lets you measure a runtime by what its mistakes actually cost — not just raw accuracy — and improve it from real-world results.
+
+## Core concepts at a glance
+
+New to decision runtimes? These breakout cards spell out the six terms you will see throughout AskWithAI.
+
+<CardGroup cols={2}>
+  <Card title="Decision Runtime" icon="cpu">
+    One repeated decision your app or agent asks — with its questions, rules, mistake costs, models, versions, and history. For example: `acme/payment-refund`.
+  </Card>
+  <Card title="Control plane" icon="sliders">
+    The plain code inside a runtime that decides, for each request, whether a second opinion is worth paying for. AskWithAI never asks an LLM whether to escalate.
+  </Card>
+  <Card title="Mistake cost" icon="scale-balanced">
+    What a wrong answer costs you, in dollars, set per kind of mistake. Wrongly approving a $240 refund loses $240; wrongly denying a valid one might cost $15 in goodwill.
+  </Card>
+  <Card title="Honest confidence (calibration)" icon="gauge-high">
+    Whether a model that says it is "90% sure" is actually right about 90% of the time. AskWithAI measures calibration and blocks overconfident fast models from answering alone.
+  </Card>
+  <Card title="Receipt" icon="receipt">
+    What comes back with every decision: the answer, which tier answered, why it escalated (or did not), how long it took, and what it cost.
+  </Card>
+  <Card title="Expert Review" icon="user-check">
+    The queue of cases that only a person can settle — high-stakes uncertainty, missing facts, or rule disagreements. Each ruling becomes a verified test case.
+  </Card>
+</CardGroup>
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Install `@askwithai/sdk`, make your first decision, and adopt safely with parity, shadow, and active modes.
+  </Card>
+  <Card title="How decisions work" icon="diagram-project" href="/how-it-works">
+    Walk through a real refund example to see the escalation ladder, mistake-cost math, and outcome learning.
+  </Card>
+  <Card title="SDK, CLI & Decision API" icon="code" href="/sdk-and-api">
+    Call your Decision Runtime from TypeScript, your terminal, or any HTTP client.
+  </Card>
+  <Card title="Connect your agent" icon="bot" href="/connect-your-agent">
+    Give Claude Code, Cursor, Codex, or Windsurf full AskWithAI skills with a single command.
+  </Card>
+</CardGroup>

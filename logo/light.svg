@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 36" width="180" height="36" role="img" aria-label="AskWithAI">
+  <defs>
+    <linearGradient id="gold-bg-light" x1="18%" y1="6%" x2="82%" y2="96%">
+      <stop offset="0%" stop-color="#FFDB4D"/>
+      <stop offset="50%" stop-color="#FFCC00"/>
+      <stop offset="100%" stop-color="#E6AE00"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(2, 2) scale(0.03125)">
+    <circle cx="512" cy="512" r="504" fill="url(#gold-bg-light)"/>
+    <g fill="#FFFFFF">
+      <path d="M 467.00 445.00 L 467.00 326.00 L 394.00 326.00 L 512.00 150.00 L 630.00 326.00 L 557.00 326.00 L 557.00 445.00 Z"/>
+      <path d="M 552.10 356.43 L 392.29 670.06 L 448.42 698.67 L 279.56 792.20 L 255.97 600.60 L 312.10 629.20 L 471.90 315.57 Z"/>
+      <path d="M 552.10 315.57 L 711.90 629.20 L 768.03 600.60 L 744.44 792.20 L 575.58 698.67 L 631.71 670.06 L 471.90 356.43 Z"/>
+      <path d="M 396.85 562.00 L 627.15 562.00 L 664.86 636.00 L 359.14 636.00 Z"/>
+    </g>
+  </g>
+  <text x="44" y="24" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif" font-size="19" font-weight="700" letter-spacing="-0.02em" fill="#0F172A">AskWithAI</text>
+</svg>

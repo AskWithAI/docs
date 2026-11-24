@@ -1,0 +1,145 @@
+---
+title: "Quickstart"
+description: "Make your first AskWithAI decision in minutes using the TypeScript SDK, CLI, or Decision API, and adopt safely with parity and shadow modes."
+---
+
+Get a working Decision Runtime wired into your app or agent in a few minutes. You can start with the TypeScript SDK, the `askwithai` CLI, or a plain HTTP call to the Decision API.
+
+<Tip>
+  **Using an AI coding agent?** You can let Claude Code, Cursor, or Codex set this up for you. See [Connect your agent](/connect-your-agent) to install the AskWithAI skills with `npx skills add https://docs.askwith.ai`.
+</Tip>
+
+## Make your first decision
+
+<Steps>
+  <Step title="Create an API key">
+    Sign in to the [AskWithAI Platform](https://askwith.ai), create a workspace (or start from the **Payment Refund** template in the guided start), and generate an API key in **Settings → API keys**.
+
+    Export it in your shell or `.env.local` file:
+
+    ```bash
+    export ASKWITHAI_API_KEY="wai_..."
+    ```
+
+    <Note>
+      Keep your API key on the server. Never commit it to Git or ship it in client-side browser code.
+    </Note>
+  </Step>
+
+  <Step title="Install the SDK (optional for HTTP)">
+    If you use TypeScript or JavaScript (Node.js 22+), install `@askwithai/sdk` — it includes both the typed client and the `askwithai` CLI:
+
+    <CodeGroup>
+      ```bash pnpm
+      pnpm add @askwithai/sdk
+      ```
+      ```bash npm
+      npm install @askwithai/sdk
+      ```
+      ```bash yarn
+      yarn add @askwithai/sdk
+      ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Call your Decision Runtime">
+    Ask your runtime for a decision on a sample refund request:
+
+    <Tabs>
+      <Tab title="TypeScript SDK">
+        ```ts
+        import { AskWithAI, createDecision, formatReceipt } from "@askwithai/sdk";
+        import { z } from "zod";
+
+        const askwithai = new AskWithAI({
+          apiKey: process.env.ASKWITHAI_API_KEY!,
+        });
+
+        const checkRefund = createDecision(askwithai, {
+          runtime: "acme/payment-refund",
+          schema: z.object({
+            approve_refund: z.enum(["approve", "deny"]),
+          }),
+        });
+
+        const { answers, decision } = await checkRefund(
+          {
+            order_id: "ord-10",
+            item: "27-inch 4K monitor",
+            amount: 240,
+            days_since_purchase: 34,
+            reason: "Factory defect: power supply failed under 1-year warranty.",
+          },
+          { idempotencyKey: "ord-10" }
+        );
+
+        console.log("Answer:", answers.approve_refund);
+        console.log(formatReceipt(decision).join("\n"));
+        ```
+      </Tab>
+
+      <Tab title="CLI">
+        ```bash
+        npx askwithai decide acme/payment-refund \
+          --input '{"order_id":"ord-10","item":"27-inch 4K monitor","amount":240,"days_since_purchase":34,"reason":"Factory defect: power supply failed under 1-year warranty."}'
+        ```
+      </Tab>
+
+      <Tab title="cURL (Decision API)">
+        ```bash
+        curl -s "https://api.askwith.ai/v1/decide/acme/payment-refund" \
+          -H "Authorization: Bearer $ASKWITHAI_API_KEY" \
+          -H "Content-Type: application/json" \
+          -d '{
+            "input": {
+              "order_id": "ord-10",
+              "item": "27-inch 4K monitor",
+              "amount": 240,
+              "days_since_purchase": 34,
+              "reason": "Factory defect: power supply failed under 1-year warranty."
+            }
+          }'
+        ```
+      </Tab>
+    </Tabs>
+  </Step>
+
+  <Step title="Report the real outcome later">
+    Once you know what actually happened (for example, a return was verified or a chargeback arrived), report the outcome back to AskWithAI. Real outcomes become verified test cases that improve future versions of your runtime.
+
+    <CodeGroup>
+      ```ts TypeScript SDK
+      await askwithai.reportOutcome(decision.id, {
+        labels: { approve_refund: "approve" },
+      });
+      ```
+      ```bash CLI
+      npx askwithai outcome <decisionId> --labels '{"approve_refund":"approve"}'
+      ```
+    </CodeGroup>
+  </Step>
+</Steps>
+
+## Roll out safely with serving modes
+
+You never have to switch production traffic to routed decisions overnight. Every Decision Runtime supports three **serving modes** so you can verify behavior before it changes a single live answer.
+
+<CardGroup cols={3}>
+  <Card title="1. Parity mode" icon="equals">
+    Returns your fast model's answer unchanged while recording every call and receipt. Zero behavioral change for your users.
+  </Card>
+  <Card title="2. Shadow mode" icon="eye">
+    Still returns the parity answer to your app, while AskWithAI runs full routing in the background so you can compare what it would have done.
+  </Card>
+  <Card title="3. Active mode" icon="bolt">
+    Serves routed decisions live — fast answers for routine cases, automatic second opinions when expected mistake cost is high.
+  </Card>
+</CardGroup>
+
+Switch modes from the Platform or in one command with the CLI:
+
+```bash
+npx askwithai mode acme/payment-refund shadow
+# Once shadow comparisons look good:
+npx askwithai mode acme/payment-refund active
+```

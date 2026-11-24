@@ -1,0 +1,90 @@
+---
+title: "Connect your agent"
+description: "Install AskWithAI skills into Claude Code, Cursor, Codex, Windsurf, and other AI coding agents with npx skills add https://docs.askwith.ai."
+---
+
+Give your AI coding agent direct knowledge of AskWithAI — how Decision Runtimes work, how to wire up `@askwithai/sdk`, how to run the `askwithai` CLI, and how to roll out safely from parity to shadow to active mode.
+
+## Install AskWithAI skills in one step
+
+Copy the prompt below into your coding agent, or run the command directly in your terminal.
+
+<Prompt description="Install AskWithAI skills into your AI coding agent." actions={["copy", "cursor"]}>
+Install the skills from https://docs.askwith.ai into my agent context.
+1. Run `npx skills add https://docs.askwith.ai`.
+2. List the installed skills with name and description.
+3. Summarize in one paragraph what you can now do with AskWithAI.
+</Prompt>
+
+Prefer to run it yourself? Execute this command in your terminal:
+
+```bash
+npx skills add https://docs.askwith.ai
+```
+
+The `skills` CLI automatically detects your installed agents (Claude Code, Cursor, Windsurf, Codex, and others) and lets you install the AskWithAI skills to all of them or choose specific ones.
+
+## How agent discovery works
+
+Not familiar with `skill.md`, `llms.txt`, or MCP? Here is what each piece does under the hood:
+
+<CardGroup cols={3}>
+  <Card title="What is skill.md?" icon="sparkles">
+    A structured capability summary hosted at `docs.askwith.ai/skill.md` and indexed at `/.well-known/skills/index.json`. It tells agents *what* they can build with AskWithAI, what inputs are needed, and what rules to follow.
+  </Card>
+  <Card title="What is llms.txt?" icon="file-lines">
+    A machine-readable table of contents at `docs.askwith.ai/llms.txt` that lists every documentation page with a short description so agents can look up exact details fast.
+  </Card>
+  <Card title="What is MCP?" icon="plug">
+    The **Model Context Protocol** — a standard way for agents to call live tools. AskWithAI's MCP server gives your agent 16 tools to inspect runtimes, run decisions, replay versions, and report outcomes.
+  </Card>
+</CardGroup>
+
+### Discovery endpoints
+
+You can inspect or verify the live agent endpoints directly:
+
+- **Skill file:** `https://docs.askwith.ai/skill.md`
+- **Skills discovery index:** `https://docs.askwith.ai/.well-known/skills/index.json`
+- **Agent-skills discovery index (v0.2):** `https://docs.askwith.ai/.well-known/agent-skills/index.json`
+- **Docs directory for LLMs:** `https://docs.askwith.ai/llms.txt`
+
+## Connect the AskWithAI MCP server
+
+While `npx skills add https://docs.askwith.ai` teaches your agent *how* to use AskWithAI, connecting the **AskWithAI MCP server** lets your agent interact with your workspace directly (listing runtimes, making test decisions, checking release gates, and inspecting stats).
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude mcp add --transport http askwithai https://api.askwith.ai/api/mcp \
+      --header "Authorization: Bearer $ASKWITHAI_API_KEY"
+    ```
+  </Tab>
+  <Tab title="Codex">
+    ```bash
+    codex mcp add askwithai \
+      --url https://api.askwith.ai/api/mcp \
+      --bearer-token-env-var ASKWITHAI_API_KEY
+    ```
+  </Tab>
+  <Tab title="Cursor">
+    Add this entry to `.cursor/mcp.json`:
+
+    ```json
+    {
+      "mcpServers": {
+        "askwithai": {
+          "url": "https://api.askwith.ai/api/mcp",
+          "headers": {
+            "Authorization": "Bearer ${env:ASKWITHAI_API_KEY}"
+          }
+        }
+      }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  MCP tools enforce the exact same API key scopes as the HTTP Decision API. Agents never silently settle human-only **Expert Review** items or approve high-stakes releases without your confirmation.
+</Note>

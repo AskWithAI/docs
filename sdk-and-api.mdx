@@ -1,0 +1,133 @@
+---
+title: "SDK, CLI & Decision API"
+description: "Integrate AskWithAI into TypeScript apps with @askwithai/sdk, operate runtimes from the terminal with askwithai, or call the HTTP Decision API directly."
+---
+
+Pick the interface that fits your stack. All three talk to the same Decision API and use the same scoped `ASKWITHAI_API_KEY`.
+
+## TypeScript SDK (`@askwithai/sdk`)
+
+`@askwithai/sdk` provides a typed client, Zod-validated decisions with `createDecision`, receipt formatting, and a faux server (`@askwithai/sdk/testing`) for fast local tests.
+
+### Direct client call
+
+```ts
+import { AskWithAI, formatReceipt } from "@askwithai/sdk";
+
+const askwithai = new AskWithAI({
+  apiKey: process.env.ASKWITHAI_API_KEY!,
+});
+
+const decision = await askwithai.decide("acme/payment-refund", {
+  input: { amount: 42, days_since_purchase: 10, reason: "Wrong size" },
+  idempotencyKey: "ord-42",
+});
+
+console.log(formatReceipt(decision).join("\n"));
+```
+
+### Typed decisions with Zod
+
+Use `createDecision` to validate answers at runtime and get full TypeScript inference:
+
+```ts
+import { AskWithAI, createDecision } from "@askwithai/sdk";
+import { z } from "zod";
+
+const askwithai = new AskWithAI({ apiKey: process.env.ASKWITHAI_API_KEY! });
+
+export const checkRefund = createDecision(askwithai, {
+  runtime: "acme/payment-refund",
+  schema: z.object({
+    approve_refund: z.enum(["approve", "deny"]),
+  }),
+});
+
+const { answers, decision } = await checkRefund(order, {
+  traceId: order.order_id,
+});
+```
+
+<Card title="What is an idempotencyKey?" icon="key">
+  A unique ID you attach to a request (like an `order_id`). If your app retries the same call after a network hiccup, AskWithAI returns the original decision instead of running the models twice.
+</Card>
+
+## The `askwithai` CLI
+
+The `askwithai` command ships with `@askwithai/sdk` and covers the full Decision API from your terminal or CI pipeline.
+
+| Command | What it does |
+| --- | --- |
+| `npx askwithai init` | Reads your workspace and prints next steps for your setup |
+| `npx askwithai push <dir> --runtime <owner/name>` | Uploads a runtime package as a new candidate version |
+| `npx askwithai mode <owner/name> <parity\|shadow\|active>` | Changes how live traffic is served |
+| `npx askwithai decide <owner/name> --input '<json>'` | Runs a single decision and prints the answer and receipt |
+| `npx askwithai status <owner/name>` | Prints the runtime's Fast, Accurate, and Improving scorecard |
+| `npx askwithai replay --runtime <owner/name> --version <n>` | Replays a candidate version against past traffic before release |
+| `npx askwithai outcome <decisionId> --labels '<json>'` | Reports what really happened on a past decision |
+| `npx askwithai endpoints` | Lists every live API endpoint from the server's OpenAPI spec |
+
+## Decision API (HTTP)
+
+Call any runtime from Python, Go, Ruby, or any HTTP client using a Bearer token.
+
+### `POST /v1/decide/{owner}/{runtime}`
+
+<ParamField path="owner" type="string" required>
+  Your workspace handle (for example, `acme`).
+</ParamField>
+
+<ParamField path="runtime" type="string" required>
+  The Decision Runtime slug (for example, `payment-refund`).
+</ParamField>
+
+<ParamField header="Authorization" type="string" required>
+  Bearer token using your API key: `Bearer wai_...`.
+</ParamField>
+
+<ParamField body="input" type="object" required>
+  The structured JSON payload your runtime's questions evaluate.
+</ParamField>
+
+<ParamField body="idempotencyKey" type="string">
+  Optional key to safely deduplicate retried requests.
+</ParamField>
+
+```bash
+curl -s "https://api.askwith.ai/v1/decide/acme/payment-refund" \
+  -H "Authorization: Bearer $ASKWITHAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": {
+      "order_id": "ord-10",
+      "amount": 240,
+      "item": "27-inch 4K monitor",
+      "days_since_purchase": 34,
+      "reason": "Factory defect under 1-year warranty."
+    },
+    "idempotencyKey": "ord-10"
+  }'
+```
+
+### Reporting real outcomes
+
+Send real-world results to `POST /v1/decisions/{id}/outcome` once a decision's outcome is known:
+
+```bash
+curl -s "https://api.askwith.ai/v1/decisions/dec_123/outcome" \
+  -H "Authorization: Bearer $ASKWITHAI_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"labels": {"approve_refund": "approve"}}'
+```
+
+<ResponseField name="decision.id" type="string">
+  Unique identifier for the recorded decision. Save this to attach outcomes later.
+</ResponseField>
+
+<ResponseField name="decisions" type="object">
+  Map of question names to their resolved answers (for example, `approve_refund.answer`).
+</ResponseField>
+
+<ResponseField name="receipt" type="object">
+  Full explanation of how the decision was reached: path taken (`fast_only`, `fast_then_reasoning`, etc.), latency, cost, and plain-language reason.
+</ResponseField>
