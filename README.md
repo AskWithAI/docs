@@ -13,3 +13,7 @@ npx mint@latest dev
 ```bash
 npx skills add https://docs.askwith.ai
 ```
+
+## Agent skills
+
+The skills in `.mintlify/skills/` are copied from the public [AskWithAI/skills](https://github.com/AskWithAI/skills) repository by its sync workflow, which opens a pull request here whenever a skill changes. Do not edit them here: change them in AskWithAI/skills.
