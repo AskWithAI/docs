@@ -6,6 +6,7 @@ compatibility: Node.js 22+ for @askwithai/sdk and the askwithai CLI. Works with 
 metadata:
   author: AskWithAI
   website: https://docs.askwith.ai
+  source: https://github.com/AskWithAI/skills
 ---
 
 # AskWithAI — Decision Runtime Platform
@@ -73,9 +74,28 @@ npx askwithai replay --runtime acme/payment-refund --version 2 --against live --
 - Report a real outcome: `POST https://api.askwith.ai/v1/decisions/{id}/outcome` with JSON body `{"labels": {"approve_refund": "approve"}}`.
 - MCP server: `https://api.askwith.ai/api/mcp` (Streamable HTTP with `Authorization: Bearer $ASKWITHAI_API_KEY`).
 
+## Decision statuses
+
+- `decided` and `failed` answer 200. Act on `decisions.<question>.answer`.
+- `running` (a slower tier is still working), `pending_review` (a person is choosing; treat `provisionalDecision` as provisional), `input_required` (a fact is missing; supply it with `POST /v1/decisions/{id}/input` or the MCP tool `answer_input`) and `paused` answer 202. Poll `GET /v1/decisions/{id}` or wait for the webhook.
+- Provider-compatible endpoints (`/v1/systemone`, Gemini Decisions) never wait for a person.
+
+## Connect the MCP server
+
+- Claude Code: `claude mcp add --transport http askwithai https://api.askwith.ai/api/mcp --header "Authorization: Bearer $ASKWITHAI_API_KEY"`
+- Codex: `codex mcp add askwithai --url https://api.askwith.ai/api/mcp --bearer-token-env-var ASKWITHAI_API_KEY` (check `codex mcp add --help`; flag names vary by version).
+- Tools include list_runtimes, decide, get_decision, list_decisions, runtime_stats, list_reviews, settle_review, answer_input, report_outcome, set_serving_mode, push_package, add_decision_to_test_set, replay_version and check_release_gates.
+- Each runtime also serves its own skill: `GET https://api.askwith.ai/v1/runtimes/{owner}/{runtime}/skill.md`.
+
+## Related skill
+
+To move an existing app's decisions onto AskWithAI step by step, use the `askwithai-setup` skill from the same package (`npx skills add AskWithAI/skills`).
+
 ## Constraints and best practices
 
 - Never ask a model whether to escalate; routing and release checks are always plain code.
 - Only a person's ruling or a real outcome may become a test label — model disagreement is a lead, not a label.
 - Keep `ASKWITHAI_API_KEY` on the server; never expose it in client-side browser code or commit it to Git.
 - Start in `parity` or `shadow` mode before switching a production runtime to `active`.
+- Do not decide these questions yourself when a runtime exists for them: call the runtime and act on its answer.
+- Demo-mode answers are marked `synthetic: true` and are never measurements.

@@ -24,13 +24,20 @@ npx skills add https://docs.askwith.ai
 
 The `skills` CLI automatically detects your installed agents (Claude Code, Cursor, Windsurf, Codex, and others) and lets you install the AskWithAI skills to all of them or choose specific ones.
 
+You get two skills:
+
+- **`askwithai`**: how to call Decision Runtimes with `@askwithai/sdk`, the `askwithai` CLI, the Decision API, or the MCP server, and how to report real outcomes.
+- **`askwithai-setup`**: a step-by-step guide for moving an existing app's decisions onto AskWithAI, from parity to shadow to active mode.
+
+The skills are open source in [AskWithAI/skills](https://github.com/AskWithAI/skills) on GitHub. `npx skills add AskWithAI/skills` installs the same skills straight from there.
+
 ## How agent discovery works
 
 Not familiar with `skill.md`, `llms.txt`, or MCP? Here is what each piece does under the hood:
 
 <CardGroup cols={3}>
   <Card title="What is skill.md?" icon="sparkles">
-    A structured capability summary hosted at `docs.askwith.ai/skill.md` and indexed at `/.well-known/skills/index.json`. It tells agents *what* they can build with AskWithAI, what inputs are needed, and what rules to follow.
+    A `SKILL.md` file is a short guide an agent loads when a task matches its description. It tells agents *what* they can build with AskWithAI, what inputs are needed, and what rules to follow. The skills here are listed at `/.well-known/skills/index.json`.
   </Card>
   <Card title="What is llms.txt?" icon="file-lines">
     A machine-readable table of contents at `docs.askwith.ai/llms.txt` that lists every documentation page with a short description so agents can look up exact details fast.
@@ -44,7 +51,7 @@ Not familiar with `skill.md`, `llms.txt`, or MCP? Here is what each piece does u
 
 You can inspect or verify the live agent endpoints directly:
 
-- **Skill file:** `https://docs.askwith.ai/skill.md`
+- **Skill source:** `https://github.com/AskWithAI/skills`
 - **Skills discovery index:** `https://docs.askwith.ai/.well-known/skills/index.json`
 - **Agent-skills discovery index (v0.2):** `https://docs.askwith.ai/.well-known/agent-skills/index.json`
 - **Docs directory for LLMs:** `https://docs.askwith.ai/llms.txt`
